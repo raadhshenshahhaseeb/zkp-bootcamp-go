@@ -9,6 +9,8 @@ import (
 )
 
 func main() {
+	fmt.Println("curve order: ", bn256.Order)
+	verifyOrderAndMod()
 	basics()
 	pairing()
 	finalExponentiate()
@@ -114,6 +116,71 @@ func finalExponentiate() {
 	} else {
 		fmt.Println("Result is not the identity element")
 	}
+}
+
+func bigFromBase10(s string) *big.Int {
+	n, _ := new(big.Int).SetString(s, 10)
+	return n
+}
+
+func verifyOrderAndMod() {
+	verifyParamU()
+	// u is the BN parameter that determines the prime: 1868033³.
+	var u = bigFromBase10("6518589491078791937")
+
+	// Compute p = 36u⁴ + 36u³ + 24u² + 6u + 1
+	u2 := new(big.Int).Mul(u, u)
+	u3 := new(big.Int).Mul(u2, u)
+	u4 := new(big.Int).Mul(u3, u)
+
+	p := new(big.Int).Mul(u4, big.NewInt(36))
+	temp := new(big.Int).Mul(u3, big.NewInt(36))
+	p.Add(p, temp)
+	temp.Mul(u2, big.NewInt(24))
+	p.Add(p, temp)
+	temp.Mul(u, big.NewInt(6))
+	p.Add(p, temp)
+	p.Add(p, big.NewInt(1))
+
+	// Print computed modulus p
+	fmt.Println("Computed modulus p:", p)
+
+	// Given p value
+	givenP := bigFromBase10("65000549695646603732796438742359905742825358107623003571877145026864184071783")
+	fmt.Println("Given modulus p:", givenP)
+	fmt.Println("Modulus p matches:", p.Cmp(givenP) == 0)
+
+	// Compute order = 36u⁴ + 36u³ + 18u² + 6u + 1
+	order := new(big.Int).Mul(u4, big.NewInt(36))
+	temp.Mul(u3, big.NewInt(36))
+	order.Add(order, temp)
+	temp.Mul(u2, big.NewInt(18))
+	order.Add(order, temp)
+	temp.Mul(u, big.NewInt(6))
+	order.Add(order, temp)
+	order.Add(order, big.NewInt(1))
+
+	// Print computed order
+	fmt.Println("Computed order:", order)
+
+	// Given order value
+	givenOrder := bigFromBase10("65000549695646603732796438742359905742570406053903786389881062969044166799969")
+	fmt.Println("Given order:", givenOrder)
+	fmt.Println("Order matches:", order.Cmp(givenOrder) == 0)
+}
+
+func verifyParamU() {
+	// Define the known parameter u
+	var u = bigFromBase10("6518589491078791937")
+
+	// Compute 1868033³
+	base := bigFromBase10("1868033")
+	cubed := new(big.Int).Exp(base, big.NewInt(3), nil)
+
+	// Print the results
+	fmt.Println("Computed 1868033³:", cubed)
+	fmt.Println("Given u:", u)
+	fmt.Println("Match:", cubed.Cmp(u) == 0)
 }
 
 func homework5() {
