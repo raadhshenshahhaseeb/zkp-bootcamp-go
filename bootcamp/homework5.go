@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/cloudflare/bn256"
+	bn256 "github.com/ethereum/go-ethereum/crypto/bn256/cloudflare"
 )
 
 func main() {
@@ -13,7 +13,7 @@ func main() {
 }
 
 func basics() {
-	a, _ := rand.Int(rand.Reader, bn256.Order)
+	a, _ := rand.Int(rand.Reader, bigFromBase10("21888242871839275222246405745257275088548364400416034343698204186575808495617"))
 
 	g2a := new(bn256.G2).ScalarBaseMult(a)
 
@@ -99,19 +99,6 @@ func finalExponentiate() {
 
 	result := new(bn256.GT).Add(pairingAB, pairingCD)
 	result = new(bn256.GT).Add(result, pairingEF)
-
-	identity := new(bn256.GT).ScalarBaseMult(big.NewInt(0))
-
-	fmt.Println("Result of multiplication (should be identity):")
-	fmt.Println(result)
-	fmt.Println("Identity element:")
-	fmt.Println(identity)
-
-	if result.String() == identity.String() {
-		fmt.Println("Result is the identity element")
-	} else {
-		fmt.Println("Result is not the identity element")
-	}
 }
 
 func bigFromBase10(s string) *big.Int {
@@ -181,63 +168,14 @@ func verifyParamU() {
 
 func homework5() {
 	fmt.Println("curve order: ", bn256.Order)
-	p := bigFromBase10("65000549695646603732796438742359905742825358107623003571877145026864184071783")
-	fmt.Println("prime p: ", p)
-
+	fmt.Println("mod p: ", bn256.P)
 	beta2 := new(bn256.G2).ScalarBaseMult(big.NewInt(1))
 	alfa1 := new(bn256.G1).ScalarBaseMult(big.NewInt(2))
 	gamma2 := new(bn256.G2).ScalarBaseMult(big.NewInt(2))
 	delta2 := new(bn256.G2).ScalarBaseMult(big.NewInt(2))
 
-	labels := []string{"beta2", "gamma2", "delta2"}
-	verifyAndReduceConversion(alfa1, []*bn256.G2{beta2, gamma2, delta2}, labels, p)
-}
-
-// pointToBigInt converts a *bn256.G1 point to big.Int representations
-func pointToBigInt(g1 *bn256.G1) (*big.Int, *big.Int) {
-	x, y := new(big.Int), new(big.Int)
-	bytes := g1.Marshal()
-	x.SetBytes(bytes[:32])
-	y.SetBytes(bytes[32:])
-	return x, y
-}
-
-// pointToBigIntG2 converts a *bn256.G2 point to big.Int representations
-func pointToBigIntG2(g2 *bn256.G2) (*big.Int, *big.Int, *big.Int, *big.Int) {
-	x0, x1, y0, y1 := new(big.Int), new(big.Int), new(big.Int), new(big.Int)
-	bytes := g2.Marshal()
-	x0.SetBytes(bytes[:32])
-	x1.SetBytes(bytes[32:64])
-	y0.SetBytes(bytes[64:96])
-	y1.SetBytes(bytes[96:])
-	return x0, x1, y0, y1
-}
-
-// modP reduces a big.Int value to fit within the prime p using modulo operation
-func modP(value *big.Int, p *big.Int) *big.Int {
-	return new(big.Int).Mod(value, p)
-}
-
-// verifyAndReduceConversion checks if the conversion from hex to uint format is correct and applies reduction if necessary
-func verifyAndReduceConversion(g1 *bn256.G1, g2 []*bn256.G2, labels []string, p *big.Int) {
-	x1, y1 := pointToBigInt(g1)
-
-	// Reduce and print G1 point
-	x1 = modP(x1, p)
-	y1 = modP(y1, p)
-	fmt.Printf("G1 Point: (x: %s, y: %s)\n", x1.String(), y1.String())
-
-	// Loop through the array of G2 points
-	for i, point := range g2 {
-		x0, x1G2, y0, y1G2 := pointToBigIntG2(point)
-
-		// Reduce each coordinate
-		x0 = modP(x0, p)
-		x1G2 = modP(x1G2, p)
-		y0 = modP(y0, p)
-		y1G2 = modP(y1G2, p)
-
-		// Print reduced coordinates with label
-		fmt.Printf("%s G2 Point: ((x0: %s, y0: %s), (x1: %s, y1: %s))\n", labels[i], x0.String(), y0.String(), x1G2.String(), y1G2.String())
-	}
+	fmt.Println("alfa: ", alfa1.String())
+	fmt.Println("beta: ", beta2.String())
+	fmt.Println("gamma: ", gamma2.String())
+	fmt.Println("delta: ", delta2.String())
 }
