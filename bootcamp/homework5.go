@@ -167,6 +167,20 @@ func verifyParamU() {
 }
 
 func homework5() {
+
+}
+
+func satisfyEquation() {
+	// satisfy the equation: 0 = -A_1B_2 + Alfa_1Beta_2 + X_1Gamma2 + C_1Delta2
+	// where X1 = x_1G1 + x_2G1 + x_3G1 where x_n is uint256
+	order, modp, alfa1, beta2, gamma2, delta2 := constVals()
+
+	A1 := new(bn256.G1).ScalarBaseMult(big.NewInt(2))
+	B2 := new(bn256.G2).ScalarBaseMult(big.NewInt(5))
+	C1 := new(bn256.G1).ScalarBaseMult(big.NewInt(3))
+}
+
+func constVals() (*big.Int, *big.Int, *bn256.G1, *bn256.G2, *bn256.G2, *bn256.G2) {
 	fmt.Println("curve order: ", bn256.Order)
 	fmt.Println("mod p: ", bn256.P)
 	beta2 := new(bn256.G2).ScalarBaseMult(big.NewInt(1))
@@ -178,4 +192,6 @@ func homework5() {
 	fmt.Println("beta: ", beta2.String())
 	fmt.Println("gamma: ", gamma2.String())
 	fmt.Println("delta: ", delta2.String())
+
+	return bn256.Order, bn256.P, alfa1, beta2, gamma2, delta2
 }
